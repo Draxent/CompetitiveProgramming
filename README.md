@@ -1,2 +1,2 @@
 # CompetitiveProgramming
-Solutions to problems from various online judges like UVa, Codingame, etc.
+Solutions to problems from various online judges like UVa, CodinGame, etc.
