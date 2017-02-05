@@ -11,85 +11,88 @@
 #define WAIT_PRINT (TIME_MILLISECONDS * MILLISECONDS)
 #define PRINT_MAZE false
 
-using namespace std;
-
 class Maze
 {
 public:
-	Maze( size_t rows, size_t columns, size_t* result ) : rows(rows), columns(columns)
+	Maze( size_t rows, size_t columns, size_t* result )
+      : m_rows(rows), m_columns(columns), m_maze(nullptr)
 	{
 		// At the beginning all cells are unvisited
 		result[0] = rows*columns;
 
 		// Allocate the rows ( plus the border )
-		maze = new int8_t*[rows + 2];
+    m_maze = new int8_t*[rows + 2];
 
 		// First row is a wall
-		maze[0] = new int8_t[columns + 2];
+    m_maze[0] = new int8_t[columns + 2];
 		for ( size_t j = 0; j < columns + 2; j++ )
-			maze[0][j] = WALL;
+      m_maze[0][j] = WALL;
 
 		// Build the central maze
 		for ( size_t i = 1; i <= rows; i++ )
 		{
 			// Allocate the columns ( plus the border )
-			maze[i] = new int8_t[columns + 2];
+      m_maze[i] = new int8_t[columns + 2];
 
 			// First column is a wall
-			maze[i][0] = WALL;
+      m_maze[i][0] = WALL;
 			// Insert the other walls into the maze
 			for ( size_t j = 1; j <= columns; j++ )
 			{
 				// Read a character
 				char c;
-				cin >> c;
+				std::cin >> c;
 				// If the character is 1 means that there is a wall
 				if ( c == '1' )
 				{
-					maze[i][j] = WALL;
+          m_maze[i][j] = WALL;
 					// Remove all walls from the result of unvisited cell
 					result[0]--;
 				}
-				else maze[i][j] = 0;
+				else m_maze[i][j] = 0;
 			}
 			// Last column is a wall
-			maze[i][columns + 1] = WALL;
+      m_maze[i][columns + 1] = WALL;
 		}
 
 		// Last row is a wall
-		maze[rows + 1] = new int8_t[columns + 2];
+    m_maze[rows + 1] = new int8_t[columns + 2];
 		for ( size_t j = 0; j < columns + 2; j++ )
-			maze[rows + 1][j] = WALL;
+      m_maze[rows + 1][j] = WALL;
 	}
+  Maze(const Maze&) = delete;
+  Maze& operator=(const Maze&) = delete;
+  Maze(const Maze&&) = delete;
+  Maze& operator=(Maze&&) = delete;
 
-	inline int8_t get( size_t i, size_t j ){ return maze[i+1][j+1]; }
-	inline void set( size_t i, size_t j, int8_t value ){ maze[i+1][j+1] = value; }
+	inline int8_t get( size_t i, size_t j ){ return m_maze[i+1][j+1]; }
+	inline void set( size_t i, size_t j, int8_t value ){ m_maze[i+1][j+1] = value; }
 
 	void print( )
 	{
 		// Clear screen
-		cout << "\033[2J\033[1;1H";
+    std::cout << "\033[2J\033[1;1H";
 
-		for ( size_t i = 1; i <= rows; i++)
+		for ( size_t i = 1; i <= m_rows; i++)
 		{
-			for ( size_t j = 1; j <= columns; j++ )
-				cout << setw(2) << static_cast<int16_t>(maze[i][j]) << " ";
-			cout << endl;
+			for ( size_t j = 1; j <= m_columns; j++ )
+        std::cout << std::setw(2) << static_cast<int16_t>(m_maze[i][j]) << " ";
+      std::cout << std::endl;
 		}
-		cout << endl;
+    std::cout << std::endl;
 		usleep( WAIT_PRINT );
 	}
 
 	~Maze()
 	{
-		for ( size_t i = 0; i < rows + 2; i++ )
-			delete maze[i];
-		delete maze;
+		for ( size_t i = 0; i < m_rows + 2; i++ )
+			delete m_maze[i];
+		delete m_maze;
 	}
 
 private:
-	size_t rows, columns;
-	int8_t** maze;
+	size_t m_rows, m_columns;
+	int8_t** m_maze;
 };
 
 typedef enum
@@ -106,7 +109,7 @@ public:
 	size_t X, Y; // position of the mouse
 	direction_t Dir; // direction of the mouse
 
-	Mouse() { }
+	Mouse() : X(0), Y(0), Dir(E) { }
 
 	inline void turnL()
 	{
@@ -164,7 +167,7 @@ public:
 	{
 		// We are get out of the cell, so we increment the number of times we visited it
 		int8_t old = maze.get( Y, X );
-		maze.set( Y, X, old + 1 );
+		maze.set( Y, X, static_cast<int8_t >(old + 1) );
 		result[old]--;
 		result[old+1]++;
 
@@ -183,8 +186,8 @@ public:
 void printResult( size_t* result )
 {
 	for ( int i = 0; i < NUM_RESULTS; i++ )
-		cout << setw(3) << result[i];
-	cout << endl;
+    std::cout << std::setw(3) << result[i];
+  std::cout << std::endl;
 }
 
 int main()
@@ -218,8 +221,8 @@ int main()
 			result[i] = 0;
 
 		// Read maze size
-		cin >> rows;
-		cin >> columns;
+    std::cin >> rows;
+    std::cin >> columns;
 
 		// Exit if they are both zeros
 		if ( rows == 0 && columns == 0 )
